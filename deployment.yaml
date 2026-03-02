@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devopsapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devopsapi
+  template:
+    metadata:
+      labels:
+        app: devopsapi
+    spec:
+      containers:
+        - name: devopsapi
+          image: samvelterbalyan14/devopsapi-e2e:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
