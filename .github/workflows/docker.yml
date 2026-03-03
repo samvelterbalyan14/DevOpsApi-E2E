@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Deploy Production
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Login to DockerHub
@@ -19,15 +19,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build Image (SHA)
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }} .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
 
-      - name: Push Docker image
+      - name: Push Image (SHA)
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
-      - name: Deploy to Kubernetes
+
+      - name: Apply Base Deployment
         run: |
-          kubectl set image deployment/devopsapi devopsapi=${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}
+          kubectl apply -f deployment.yaml
+
+      - name: Deploy SHA Version
+        run: |
+          kubectl set image deployment/devopsapi \
+          devopsapi=${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}
+
+      - name: Wait for Rollout
+        run: |
+          kubectl rollout status deployment/devopsapi
