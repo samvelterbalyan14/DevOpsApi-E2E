@@ -30,5 +30,4 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f deployment.yaml
-          kubectl apply -f service.yaml
+          kubectl set image deployment/devopsapi devopsapi=${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}

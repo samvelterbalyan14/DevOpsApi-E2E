@@ -13,9 +13,8 @@ spec:
         app: devopsapi
     spec:
       containers:
-        - name: Deploy to Kubernetes
-          run: |
-            kubectl set image deployment/devopsapi devopsapi=${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}
+        - name: devopsapi
+          image: samvelterbalyan14/devopsapi-e2e:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
