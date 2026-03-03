@@ -20,10 +20,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/devopsapi-e2e:latest
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f deployment.yaml
